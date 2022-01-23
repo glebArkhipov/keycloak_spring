@@ -1,37 +1,44 @@
 package com.keycloakspring
 
-import org.keycloak.adapters.KeycloakConfigResolver
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver
-import org.keycloak.adapters.springsecurity.KeycloakConfiguration
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter
-import org.springframework.beans.factory.annotation.Autowired
+import net.minidev.json.JSONArray
 import org.springframework.context.annotation.Bean
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper
-import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 
-
-@KeycloakConfiguration
-@EnableGlobalMethodSecurity(prePostEnabled=true)
-class WebSecurityConfig: KeycloakWebSecurityConfigurerAdapter() {
-    override fun sessionAuthenticationStrategy(): SessionAuthenticationStrategy =
-        NullAuthenticatedSessionStrategy()
-
-    @Autowired
-    fun configureGlobal(authManagerBuilder: AuthenticationManagerBuilder) {
-        val keycloakAuthenticationProvider = keycloakAuthenticationProvider()
-        keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(SimpleAuthorityMapper())
-        authManagerBuilder.authenticationProvider(keycloakAuthenticationProvider)
-    }
-
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
-        super.configure(http)
         http
+            .oauth2Login()
+            .userInfoEndpoint()
+            .oidcUserService(oidcUserService())
+            .and()
+            .and()
             .authorizeRequests()
             .antMatchers("/anonymous/**").permitAll()
-            .anyRequest().fullyAuthenticated()
+            .anyRequest().authenticated()
+    }
+
+    @Bean
+    fun oidcUserService(): OAuth2UserService<OidcUserRequest, OidcUser> {
+        val oidcServiceDelegate = OidcUserService()
+        return OAuth2UserService { userRequest ->
+            val oidcUser = oidcServiceDelegate.loadUser(userRequest)
+            val authorities = oidcUser.authorities
+                .filterIsInstance<OidcUserAuthority>()
+                .map { it.authority }
+                .map { SimpleGrantedAuthority(it) }
+            DefaultOidcUser(authorities, oidcUser.idToken, oidcUser.userInfo)
+        }
     }
 }
