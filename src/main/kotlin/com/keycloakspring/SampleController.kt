@@ -11,10 +11,8 @@ class SampleController {
     fun getAnonymousInfo(): String = "anonymous"
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('USER')")
     fun getUserInfo(): String = "user info"
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
     fun getAdminInfo(): String = "admin info"
 }
