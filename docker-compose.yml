@@ -15,7 +15,7 @@ services:
     container_name: keycloak
     environment:
       DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
+      DB_ADDR: keycloak_db
       DB_DATABASE: keycloak_db
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
