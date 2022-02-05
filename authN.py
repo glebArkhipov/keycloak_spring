@@ -17,10 +17,10 @@ def generate_code_verifier_and_challenge():
     return {"code_challenge": code_challenge, "code_verifier": code_verifier}
 
 
-def get_tokens_by_login_and_password():
+def get_tokens_by_login_and_password(login="test", password="test"):
     data = {
-        'username': 'test',
-        'password': 'test',
+        'username': login,
+        'password': password,
         'grant_type': 'password',
         'client_id': 'my_realm',
     }
@@ -41,14 +41,21 @@ def get_tokens_by(access_code):
 def call_user_endpoint():
     access_token = get_tokens_by_login_and_password()['access_token']
     headers = {'Authorization': f'Bearer {access_token}'}
-    resp = requests.get('http://localhost:8080/user', headers=headers).content
-    print(resp)
+    resp = requests.get('http://localhost:8080/user', headers=headers)
+    print(resp.status_code)
+    print(resp.content)
+
+
+def call_writer_endpoint(login="writer", password="writer"):
+    access_token = get_tokens_by_login_and_password(login, password)['access_token']
+    headers = {'Authorization': f'Bearer {access_token}'}
+    resp = requests.get('http://localhost:8080/writer', headers=headers)
+    print(resp.status_code)
+    print(resp.content)
 
 
 if __name__ == "__main__":
-    print(generate_code_verifier_and_challenge())
+    call_writer_endpoint()
+    call_writer_endpoint("test", "test")
     # print(get_tokens_by_login_and_password()['access_token'])
     # pprint.pprint(get_tokens_by('27bb1420-26b1-44d0-b9bb-8f4cb2574b29.f01fdbe0-116a-4a11-854c-82ec61e6483f.my_realm'))
-
-# url to login page
-# http://localhost:8484/auth/realms/my_realm/protocol/openid-connect/auth?response_type=code&client_id=my_realm&redirect_uri=http://localhost:8080/not/important/now&code_challenge=Y4fhKdeI8y4rCBTJlfER7bUDrDAYx5LDJRMzVSeDibk&code_challenge_method=S256

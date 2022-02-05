@@ -32,6 +32,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
             .and()
             .authorizeRequests()
             .antMatchers("/anonymous/**").permitAll()
+            .antMatchers("/writer/**").hasAnyRole("writer")
             .anyRequest().authenticated()
     }
 

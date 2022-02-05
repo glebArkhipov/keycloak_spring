@@ -1,6 +1,16 @@
 {
   "enabled": true,
   "realm": "my_realm",
+  "roles": {
+    "realm":[
+      {
+        "name": "writer",
+        "description": "writer",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
   "clients": [
     {
       "id": "my_realm",
@@ -28,6 +38,20 @@
     }
   ],
   "users": [
+    {
+      "username": "writer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "writer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "writer"
+      ]
+    },
     {
       "username": "test",
       "enabled": true,

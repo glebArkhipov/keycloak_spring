@@ -12,6 +12,6 @@ class SampleController {
     @GetMapping("/user")
     fun getUserInfo(): String = "user info"
 
-    @GetMapping("/admin")
-    fun getAdminInfo(): String = "admin info"
+    @GetMapping("/writer")
+    fun getAdminInfo(): String = "writer info"
 }
